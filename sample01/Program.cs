@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using NCore;
+using System.IO;
 
 namespace sample01
 {
@@ -13,14 +10,24 @@ namespace sample01
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
-        }
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                // 这里添加配置文件
+                .AddJsonFile("hosting.json", true)
+                .Build();
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
+            var host = Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(AppServiceProvider.Instance().AutofacServiceProviderFactory)
+                .ConfigureWebHostDefaults(webHostBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
-                });
+                    webHostBuilder
+                      .UseContentRoot(Directory.GetCurrentDirectory())
+                      .UseConfiguration(config)
+                      .UseStartup<Startup>();
+                })
+                .Build();
+
+            host.Run();
+        }
     }
 }
