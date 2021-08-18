@@ -5,5 +5,5 @@
 
 #### .net core 常用功能演示
 
-##### 		.net core api接口开发演示			[/sample0](/.net-core-sample/tree/main/sample1)
+##### 		.net core api接口开发演示			[/sample0](https://github.com/hanbing81868164/.net-core-sample/tree/main/sample1)
 
