@@ -1,45 +1,77 @@
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using NCore;
+using NCore.AspNetCore.Extensions;
+using NCore.Extensions.Autofac;
+using NCore.Extensions.DapperEX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace sample01
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IWebHostEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables();
+            this.Configuration = builder.Build();
         }
 
-        public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        public IConfigurationRoot Configuration { get; private set; }
+
+        public ILifetimeScope AutofacContainer { get; private set; }
+
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            MapperHelper.CreateMap();
+            var alists = new List<Assembly>();
+            alists.Add(this.GetType().GetTypeInfo().Assembly);
+
+            builder.UseAutofac<AopInterceptor>(alists);
+
+            var log = AppServiceProvider.Instance().Services.GetRequiredService<NCore.Logging.ILogger>();
+            log.Error("测试日志功能:" + Guid.NewGuid().ToString());
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            MapperHelper.CreateMap();
+            services.UseNCoreAspNet<NCoreAspNetOptions>(options =>
+            {
+                options.Log4netConfig = "log4net.config";
+                options.UseUpload = true;
+                options.UseAnyCors = true;
+                options.ApiSecurityFilter = false;
+                options.DefaultDBOptions = new DefaultDBOptions
+                {
+                    DBSectionName = "DBConnectionSetting",
+                    DefaultConnectionName = "defaultConnection"
+                };
+            });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
-            app.UseStaticFiles();
+            this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
+            this.AutofacContainer.UseAppContainerServices();
+
+            app.UseNCoreCorsMiddleware();
+
+            app.UseNCoreAspNetConfigure();
 
             app.UseRouting();
+            app.UseCors("any");
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -50,4 +82,7 @@ namespace sample01
             });
         }
     }
+
+
+
 }

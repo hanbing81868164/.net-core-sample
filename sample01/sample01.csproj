@@ -5,11 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
     <PackageReference Include="NCore" Version="1.0.0" />
     <PackageReference Include="NCore.AspNetCore" Version="1.0.0" />
     <PackageReference Include="NCore.Extensions.Autofac" Version="1.0.0" />
     <PackageReference Include="NCore.Extensions.DapperEX" Version="1.0.0" />
     <PackageReference Include="NCore.Extensions.Log4NetEX" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\imgs\" />
+    <Folder Include="wwwroot\temp\" />
   </ItemGroup>
 
 </Project>
