@@ -1,14 +1,180 @@
-1. ###### 创建数据模型（ViewModel）
+##### 一、准备工作
 
-   ​	定义接口需要数据属性（名称、类型、约束等）
+###### 		1.Visual Studio NuGet程序包源配置
 
-2. 报建控制器（），编号逻辑代码
+​				源地址：http://47.102.150.59:8087/nuget/
 
-3. 进行接口调用测试
+​				一些辅助功能包，能提高开发效率
 
-4. 增加日志记录功能
+<img src="imgs/image-20210820102323879.png"/>
 
-5. 发布接口程序到服务器（windows & linux）
+###### 		2.创建项目
 
-   
+​				选择项目类型、自定义项目名称
+
+<img src="imgs/image-20210820102632982.png"/>
+
+###### 		 3.基础配置
+
+​				项目应用端口配置、IOC容器配置、日志配置、数据库配置、Map映射配置...
+
+```c#
+//Program.cs
+		public static void Main(string[] args)
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                // 添加端口配置文件
+                .AddJsonFile("hosting.json", true)
+                .Build();
+
+            var host = Host.CreateDefaultBuilder(args)
+                // 添加Autofac作为IOC容器
+                .UseServiceProviderFactory(AppServiceProvider.Instance().AutofacServiceProviderFactory)
+                .ConfigureWebHostDefaults(webHostBuilder =>
+                {
+                    webHostBuilder
+                      .UseContentRoot(Directory.GetCurrentDirectory())
+                      .UseConfiguration(config)
+                      .UseStartup<Startup>();
+                })
+                .Build();
+
+            host.Run();
+        }
+```
+
+```c#
+//Startup.cs
+		public void ConfigureServices(IServiceCollection services)
+        {
+            MapperHelper.CreateMap();//Map映射配置
+            services.UseNCoreAspNet<NCoreAspNetOptions>(options =>
+            {
+                //日志配置
+                options.Log4netConfig = "log4net.config";
+                options.UseUpload = true;
+                options.UseAnyCors = true;
+                options.ApiSecurityFilter = false;
+                //数据库配置
+                options.DefaultDBOptions = new DefaultDBOptions
+                {
+                    DBSectionName = "DBConnectionSetting",
+                    DefaultConnectionName = "defaultConnection"
+                };
+            });
+        }
+```
+
+
+
+##### 二、API实现
+
+###### 		1.创建数据模型（ViewModel）
+
+​				定义接口需要数据属性（名称、类型、约束等...）【属性命名规则全部用小写，方便前端 JS 调用时不用检查某个属性大小写问题】
+
+```c#
+    /// <summary>
+    ///用户基本信息
+    /// </summary>
+    public class UserViewMmodel
+    {
+        /// <summary>
+        /// 用户名
+        /// </summary>
+        public string user_name { get; set; } = "hanbing";
+
+        /// <summary>
+        /// 昵称
+        /// </summary>
+        public string nickname { get; set; } = "老卢聊技术";
+
+        /// <summary>
+        /// qq号码
+        /// </summary>
+        public string qq { get; set; } = "81868164";
+
+        /// <summary>
+        ///微信号码
+        /// </summary>
+        public string wxid { get; set; } = "hanbing_81868164";
+
+        /// <summary>
+        /// 地址
+        /// </summary>
+        public string address { get; set; }
+
+        /// <summary>
+        /// 年龄
+        /// </summary>
+        public int age { get; set; }
+
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime creation_time { get; set; }
+
+        /// <summary>
+        /// 版本信息
+        /// </summary>
+        public string version { get; set; }
+    }
+```
+
+
+
+###### 		2.创建控制器（Controller），编写逻辑代码
+
+​				1）.设置接口输出数据格式（JSON或XML）
+
+```c#
+    [Produces("application/json")]//Controller中方法默认输出json格式数据
+	//[Produces("application/xml")]//Controller中方法默认输出xml格式数据
+    public class TestApiController : Controller
+```
+
+​				2）.设置接口路由（定义接口版本【方便后期和新版本区分】）
+
+```c#
+    [Route("api/v1/testapi")]//固定路由配置
+	//[Route("api/v1/[controller]")]//固定部分路由配置
+    public class TestApiController  : Controller
+```
+
+​				3）.设置接口请求Method，常见如下：
+
+​							GET ：从服务器取出资源（一项或多项）
+
+​							POST ：在服务器新建一个资源
+
+​							PUT ：在服务器更新资源（客户端提供改变后的完整资源）
+
+​							PATCH ：在服务器更新资源（客户端提供改变的属性）
+
+​							DELETE ：从服务器删除资源
+
+```c#
+        /// <summary>
+        /// 返回用户信息接口
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]//请求方法为GET
+        [Route("getuser")]//自定义路由
+        //[Produces("application/xml")]//输出xml格式
+        public Task<UserViewMmodel> Index()
+        {}
+```
+
+​				4）.待续...
+
+###### 		3.进行接口调用测试
+
+###### 		4.增加日志记录功能
+
+###### 		5.发布接口程序到服务器（windows & linux）
+
+同步系统视频会尽快发布，请有需要的朋友关注我
+
+
 

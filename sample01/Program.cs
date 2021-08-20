@@ -12,11 +12,12 @@ namespace sample01
         {
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                // 这里添加配置文件
+                // 添加端口配置文件
                 .AddJsonFile("hosting.json", true)
                 .Build();
 
             var host = Host.CreateDefaultBuilder(args)
+                // 添加Autofac作为IOC容器
                 .UseServiceProviderFactory(AppServiceProvider.Instance().AutofacServiceProviderFactory)
                 .ConfigureWebHostDefaults(webHostBuilder =>
                 {

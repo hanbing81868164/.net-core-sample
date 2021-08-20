@@ -32,7 +32,6 @@ namespace sample01
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
-            MapperHelper.CreateMap();
             var alists = new List<Assembly>();
             alists.Add(this.GetType().GetTypeInfo().Assembly);
 
@@ -44,13 +43,15 @@ namespace sample01
 
         public void ConfigureServices(IServiceCollection services)
         {
-            MapperHelper.CreateMap();
+            MapperHelper.CreateMap();//Map”≥…‰≈‰÷√
             services.UseNCoreAspNet<NCoreAspNetOptions>(options =>
             {
+                //»’÷æ≈‰÷√
                 options.Log4netConfig = "log4net.config";
                 options.UseUpload = true;
                 options.UseAnyCors = true;
                 options.ApiSecurityFilter = false;
+                // ˝æ›ø‚≈‰÷√
                 options.DefaultDBOptions = new DefaultDBOptions
                 {
                     DBSectionName = "DBConnectionSetting",

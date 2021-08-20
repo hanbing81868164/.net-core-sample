@@ -7,11 +7,14 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace sample01.Controllers.v1
 {
-    [Produces("application/json")]//Controller默认输出json格式
-    [Route("api/v1/testapi")]
+    [Produces("application/json")]//Controller中方法默认输出json格式数据
+    //[Produces("application/xml")]//Controller中方法默认输出xml格式数据
+    [Route("api/v1/testapi")]//固定路由配置
+    //[Route("api/v1/[controller]")]//固定部分路由配置
     public class TestApiController : Controller
     {
 
@@ -19,28 +22,33 @@ namespace sample01.Controllers.v1
         /// 返回用户信息接口
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("getuser")]
+        [HttpGet]//请求方法为GET
+        [Route("getuser")]//自定义路由
         //[Produces("application/xml")]//输出xml格式
-        public UserViewMmodel Index()
+        public Task<UserViewMmodel> Index()
         {
-            return new UserViewMmodel
+            return Task.Run(() =>
             {
-                address = "上海市浦东区世纪大道200号",
-                age = 23,
-                creation_time = DateTime.Now,
-                qq = "123456789",
-                user_name = "hanbing",
-                version = "v1.0"
-            };
+                UserViewMmodel res = null;
+                //业务逻辑代码....
+                res = new UserViewMmodel
+                {
+                    address = "上海市浦东区世纪大道200号",
+                    age = 23,
+                    creation_time = DateTime.Now,
+                    version = "v1.0"
+                };
+
+                return res;
+            });
         }
 
         /// <summary>
         /// 输出文件接口
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("getfile")]
+        [HttpGet]//请求方法为GET
+        [Route("getfile")]//自定义路由
         public FileResult Download()
         {
             var fileData = $"{Directory.GetCurrentDirectory()}/wwwroot/css/site.css";
@@ -55,8 +63,8 @@ namespace sample01.Controllers.v1
         /// <param name="width"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("getimage/{width}/{name}")]
+        [HttpGet]//请求方法为GET
+        [Route("getimage/{width}/{name}")]//自定义路由
         public IActionResult GetImage(int width, string name)
         {
             var imgPath = $@"{Directory.GetCurrentDirectory()}/wwwroot/imgs/{name}";
@@ -89,11 +97,12 @@ namespace sample01.Controllers.v1
         }
 
         /// <summary>
-        /// 上传文件
+        /// 上传文件,需要指定name值为fromFile，如：form-data; name="fromFile"; filename="8.png"
         /// </summary>
         /// <param name="fromFile"></param>
         /// <returns></returns>
-        [Route("upfile")]
+        [Route("upfile")]//自定义路由
+        [HttpPost]//请求方法为POST
         [AllowAnonymous]
         public UpFileViewModel UplodeFile([FromForm] IFormFile fromFile)
         {
@@ -113,11 +122,12 @@ namespace sample01.Controllers.v1
 
 
         /// <summary>
-        /// 上传多个文件
+        /// 上传多个文件,需要指定name值为files，如：form-data; name="files"; filename="8.png"
         /// </summary>
         /// <param name="fromFile"></param>
         /// <returns></returns>
-        [Route("upfiles")]
+        [Route("upfiles")]//自定义路由
+        [HttpPost]//请求方法为POST
         [AllowAnonymous]
         public UpFileViewModel UplodeFiles([FromForm] IFormFileCollection files)
         {
@@ -137,7 +147,12 @@ namespace sample01.Controllers.v1
         }
 
 
-        [Route("upfiles2")]
+        /// <summary>
+        /// 上传时不需要指定name参数:form-data; name=""; filename="222222222222.jpg"
+        /// </summary>
+        /// <returns></returns>
+        [Route("upfiles2")]//自定义路由
+        [HttpPost]//请求方法为POST
         [AllowAnonymous]
         public UpFileViewModel UplodeFiles2()
         {
