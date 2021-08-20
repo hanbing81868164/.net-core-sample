@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using NCore;
 using sample01.Models;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -25,18 +26,23 @@ namespace sample01.Controllers.v1
         [HttpGet]//请求方法为GET
         [Route("getuser")]//自定义路由
         //[Produces("application/xml")]//输出xml格式
-        public Task<UserViewMmodel> Index()
+        public Task<ViewModelBase<UserViewMmodel>> Index()
         {
             return Task.Run(() =>
             {
-                UserViewMmodel res = null;
+                ViewModelBase<UserViewMmodel> res = new ViewModelBase<UserViewMmodel>();
                 //业务逻辑代码....
-                res = new UserViewMmodel
+                res = new ViewModelBase<UserViewMmodel>
                 {
-                    address = "上海市浦东区世纪大道200号",
-                    age = 23,
-                    creation_time = DateTime.Now,
-                    version = "v1.0"
+                    code = 0,
+                    msg = "成功返回用户信息",
+                    data = new UserViewMmodel
+                    {
+                        address = "上海市浦东区世纪大道200号",
+                        age = 23,
+                        creation_time = DateTime.Now,
+                        version = "v1.0"
+                    }
                 };
 
                 return res;
@@ -104,18 +110,29 @@ namespace sample01.Controllers.v1
         [Route("upfile")]//自定义路由
         [HttpPost]//请求方法为POST
         [AllowAnonymous]
-        public UpFileViewModel UplodeFile([FromForm] IFormFile fromFile)
+        public Task<UpFileViewModel> UplodeFile([FromForm] IFormFile fromFile)
         {
-            if (fromFile != null)
+            return Task.Run(() =>
             {
-                using (var sm = fromFile.OpenReadStream())
+                UpFileViewModel res = new UpFileViewModel();
+                if (fromFile != null)
                 {
-                    string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/temp/{Id.LongId()}{fromFile.FileName.GetExtension()}";
-                    sm.Save(savePath);
+                    using (var sm = fromFile.OpenReadStream())
+                    {
+                        string filePath = $"upfiles/{Id.LongId()}{fromFile.FileName.GetExtension()}";
+
+                        string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/{filePath}";
+                        sm.Save(savePath);
+                        res = new UpFileViewModel
+                        {
+                            code = 0,
+                            msg = "保存成功",
+                            data = filePath
+                        };
+                    }
                 }
-                return new UpFileViewModel { code = 0, msg = "保存成功" };
-            }
-            return new UpFileViewModel { code = 1, msg = "保存失败" };
+                return res;
+            });
         }
 
 
@@ -129,21 +146,28 @@ namespace sample01.Controllers.v1
         [Route("upfiles")]//自定义路由
         [HttpPost]//请求方法为POST
         [AllowAnonymous]
-        public UpFileViewModel UplodeFiles([FromForm] IFormFileCollection files)
+        public Task<ViewModelBase<List<string>>> UplodeFiles([FromForm] IFormFileCollection files)
         {
-            if (files != null)
+            return Task.Run(() =>
             {
-                files.ForEach(fromFile =>
+                ViewModelBase<List<string>> res = new ViewModelBase<List<string>>();
+                if (files != null)
                 {
-                    using (var sm = fromFile.OpenReadStream())
+                    res.data = new List<string>();
+                    files.ForEach(fromFile =>
                     {
-                        string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/temp/{Id.LongId()}{fromFile.FileName.GetExtension()}";
-                        sm.Save(savePath);
-                    }
-                });
-                return new UpFileViewModel { code = 0, msg = "保存成功" };
-            }
-            return new UpFileViewModel { code = 1, msg = "保存失败" };
+                        using (var sm = fromFile.OpenReadStream())
+                        {
+                            string filePath = $"upfiles/{Id.LongId()}{fromFile.FileName.GetExtension()}";
+                            string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/{filePath}";
+                            sm.Save(savePath);
+
+                            res.data.Add(filePath);
+                        }
+                    });
+                }
+                return res;
+            });
         }
 
 
@@ -154,22 +178,30 @@ namespace sample01.Controllers.v1
         [Route("upfiles2")]//自定义路由
         [HttpPost]//请求方法为POST
         [AllowAnonymous]
-        public UpFileViewModel UplodeFiles2()
+        public Task<ViewModelBase<List<string>>> UplodeFiles2()
         {
-            var files = this.Request.Form?.Files;
-            if (files != null)
+            return Task.Run(() =>
             {
-                files.ForEach(fromFile =>
+                ViewModelBase<List<string>> res = new ViewModelBase<List<string>>();
+
+                var files = this.Request.Form?.Files;
+                if (files != null)
                 {
-                    using (var sm = fromFile.OpenReadStream())
+                    res.data = new List<string>();
+                    files.ForEach(fromFile =>
                     {
-                        string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/temp/{Id.LongId()}{fromFile.FileName.GetExtension()}";
-                        sm.Save(savePath);
-                    }
-                });
-                return new UpFileViewModel { code = 0, msg = "保存成功" };
-            }
-            return new UpFileViewModel { code = 1, msg = "保存失败" };
+                        using (var sm = fromFile.OpenReadStream())
+                        {
+                            string filePath = $"upfiles/{Id.LongId()}{fromFile.FileName.GetExtension()}";
+                            string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/{filePath}";
+                            sm.Save(savePath);
+
+                            res.data.Add(filePath);
+                        }
+                    });
+                }
+                return res;
+            });
         }
 
     }

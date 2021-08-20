@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using sample01.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace sample01.Controllers.v2
 {
@@ -18,17 +19,27 @@ namespace sample01.Controllers.v2
         [HttpGet]
         [Route("getuser")]
         //[Produces("application/xml")]//输出xml格式
-        public UserViewMmodel Index()
+        public Task<ViewModelBase<UserViewMmodel>> Index()
         {
-            return new UserViewMmodel
+            return Task.Run(() =>
             {
-                address = "上海市浦东区世纪大道200号",
-                age = 23,
-                creation_time = DateTime.Now,
-                qq = "123456789",
-                user_name = "hanbing",
-                version = "v2.0"
-            };
+                ViewModelBase<UserViewMmodel> res = new ViewModelBase<UserViewMmodel>();
+                //业务逻辑代码....
+                res = new ViewModelBase<UserViewMmodel>
+                {
+                    code = 0,
+                    msg = "成功返回用户信息",
+                    data = new UserViewMmodel
+                    {
+                        address = "上海市浦东区世纪大道200号",
+                        age = 23,
+                        creation_time = DateTime.Now,
+                        version = "v1.0"
+                    }
+                };
+
+                return res;
+            });
         }
     }
 }

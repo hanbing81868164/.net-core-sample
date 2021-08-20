@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\imgs\" />
-    <Folder Include="wwwroot\temp\" />
+    <Folder Include="wwwroot\upfiles\" />
   </ItemGroup>
 
 </Project>
