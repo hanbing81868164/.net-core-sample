@@ -348,6 +348,8 @@
 
 ###### 		5.发布接口程序到服务器（windows & linux）
 
+源码地址：[hanbing81868164/.net-core-sample: .net core sample (github.com)](https://github.com/hanbing81868164/.net-core-sample)
+
 同步系统视频会尽快发布，请有需要的朋友关注我
 
 
