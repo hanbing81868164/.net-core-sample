@@ -176,18 +176,23 @@
         [HttpGet]//请求方法为GET
         [Route("getuser")]//自定义路由
         //[Produces("application/xml")]//输出xml格式
-        public Task<UserViewMmodel> Index()
+        public Task<ViewModelBase<UserViewMmodel>> Index()
         {
             return Task.Run(() =>
             {
-                UserViewMmodel res = null;
+                ViewModelBase<UserViewMmodel> res = new ViewModelBase<UserViewMmodel>();
                 //业务逻辑代码....
-                res = new UserViewMmodel
+                res = new ViewModelBase<UserViewMmodel>
                 {
-                    address = "上海市浦东区世纪大道200号",
-                    age = 23,
-                    creation_time = DateTime.Now,
-                    version = "v1.0"
+                    code = 0,
+                    msg = "成功返回用户信息",
+                    data = new UserViewMmodel
+                    {
+                        address = "上海市浦东区世纪大道200号",
+                        age = 23,
+                        creation_time = DateTime.Now,
+                        version = "v1.0"
+                    }
                 };
 
                 return res;
@@ -267,18 +272,29 @@
         [Route("upfile")]//自定义路由
         [HttpPost]//请求方法为POST
         [AllowAnonymous]
-        public UpFileViewModel UplodeFile([FromForm] IFormFile fromFile)
+        public Task<UpFileViewModel> UplodeFile([FromForm] IFormFile fromFile)
         {
-            if (fromFile != null)
+            return Task.Run(() =>
             {
-                using (var sm = fromFile.OpenReadStream())
+                UpFileViewModel res = new UpFileViewModel();
+                if (fromFile != null)
                 {
-                    string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/temp/{Id.LongId()}{fromFile.FileName.GetExtension()}";
-                    sm.Save(savePath);
+                    using (var sm = fromFile.OpenReadStream())
+                    {
+                        string filePath = $"upfiles/{Id.LongId()}{fromFile.FileName.GetExtension()}";
+
+                        string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/{filePath}";
+                        sm.Save(savePath);
+                        res = new UpFileViewModel
+                        {
+                            code = 0,
+                            msg = "保存成功",
+                            data = filePath
+                        };
+                    }
                 }
-                return new UpFileViewModel { code = 0, msg = "保存成功" };
-            }
-            return new UpFileViewModel { code = 1, msg = "保存失败" };
+                return res;
+            });
         }
 ```
 
@@ -293,21 +309,28 @@
         [Route("upfiles")]//自定义路由
         [HttpPost]//请求方法为POST
         [AllowAnonymous]
-        public UpFileViewModel UplodeFiles([FromForm] IFormFileCollection files)
+        public Task<ViewModelBase<List<string>>> UplodeFiles([FromForm] IFormFileCollection files)
         {
-            if (files != null)
+            return Task.Run(() =>
             {
-                files.ForEach(fromFile =>
+                ViewModelBase<List<string>> res = new ViewModelBase<List<string>>();
+                if (files != null)
                 {
-                    using (var sm = fromFile.OpenReadStream())
+                    res.data = new List<string>();
+                    files.ForEach(fromFile =>
                     {
-                        string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/temp/{Id.LongId()}{fromFile.FileName.GetExtension()}";
-                        sm.Save(savePath);
-                    }
-                });
-                return new UpFileViewModel { code = 0, msg = "保存成功" };
-            }
-            return new UpFileViewModel { code = 1, msg = "保存失败" };
+                        using (var sm = fromFile.OpenReadStream())
+                        {
+                            string filePath = $"upfiles/{Id.LongId()}{fromFile.FileName.GetExtension()}";
+                            string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/{filePath}";
+                            sm.Save(savePath);
+
+                            res.data.Add(filePath);
+                        }
+                    });
+                }
+                return res;
+            });
         }
 ```
 
@@ -321,32 +344,200 @@
         [Route("upfiles2")]//自定义路由
         [HttpPost]//请求方法为POST
         [AllowAnonymous]
-        public UpFileViewModel UplodeFiles2()
+        public Task<ViewModelBase<List<string>>> UplodeFiles2()
         {
-            var files = this.Request.Form?.Files;
-            if (files != null)
+            return Task.Run(() =>
             {
-                files.ForEach(fromFile =>
+                ViewModelBase<List<string>> res = new ViewModelBase<List<string>>();
+
+                var files = this.Request.Form?.Files;
+                if (files != null)
                 {
-                    using (var sm = fromFile.OpenReadStream())
+                    res.data = new List<string>();
+                    files.ForEach(fromFile =>
                     {
-                        string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/temp/{Id.LongId()}{fromFile.FileName.GetExtension()}";
-                        sm.Save(savePath);
-                    }
-                });
-                return new UpFileViewModel { code = 0, msg = "保存成功" };
-            }
-            return new UpFileViewModel { code = 1, msg = "保存失败" };
+                        using (var sm = fromFile.OpenReadStream())
+                        {
+                            string filePath = $"upfiles/{Id.LongId()}{fromFile.FileName.GetExtension()}";
+                            string savePath = $"{Directory.GetCurrentDirectory()}/wwwroot/{filePath}";
+                            sm.Save(savePath);
+
+                            res.data.Add(filePath);
+                        }
+                    });
+                }
+                return res;
+            });
         }
 ```
 
-​				4）.待续...
+###### 		3.进行接口调用测试（Postman工具）
 
-###### 		3.进行接口调用测试
+​			1）.启动VS调试功能
+
+```json
+//hosting.json
+//系统运行端口配置
+{
+  "urls": "http://*:97"
+}
+```
+
+<img src="imgs/image-20210821134424068.png"/>
+
+​			使用Postman进行用户信息接口测试
+
+<img src="imgs/image-20210821134904170.png"/>
+
+​		进行返回文件接口测试
+
+<img src="imgs/image-20210821135219842.png" />
+
+​			上传文件接口进行测试
+
+<img src="imgs/image-20210821135644149.png"/>
 
 ###### 		4.增加日志记录功能
 
-###### 		5.发布接口程序到服务器（windows & linux）
+​				1）.添加日志依赖注入必性：
+
+```c#
+    public class TestApiController : Controller
+    {
+
+        #region 日志相关
+        public NCore.Logging.ILoggerFactory loggerFactory { get; set; }
+
+        private NCore.Logging.ILogger _logger;
+
+        /// <summary>
+        /// 日志对象
+        /// </summary>
+        public NCore.Logging.ILogger Logger
+        {
+            get
+            {
+                if (_logger == null)
+                    _logger = loggerFactory.GetCurrentClassLogger(typeof(TestApiController));
+                return _logger;
+            }
+        }
+        #endregion
+```
+
+​				2）.记录运行、异常日志：
+
+```c#
+                try
+                {
+                    //业务逻辑代码....
+                    res = new ViewModelBase<UserViewMmodel>
+                    {
+                        code = 0,
+                        msg = "成功返回用户信息",
+                        data = new UserViewMmodel
+                        {
+                            address = "上海市浦东区世纪大道200号",
+                            age = 23,
+                            creation_time = DateTime.Now,
+                            version = "v1.0"
+                        }
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"唉，出错了：{ex.Message}\n{ex.StackTrace}");
+                }
+```
+
+​					文件不存在日志记录：
+
+```
+        public IActionResult GetImage(int width, string name)
+        {
+            var imgPath = $@"{Directory.GetCurrentDirectory()}/wwwroot/imgs/{name}";
+            if (imgPath.ExistsFile())
+            {
+            	//....
+            }
+            else
+            {
+                Logger.Warn($"文件不存在：{imgPath}");
+                return Content("文件不存在");
+            }
+        }
+```
+
+​				日志信息：
+
+```tex
+2021-08-21 13:43:29,341 [1] ERROR NCore [(null)] - 测试日志功能:764f5d88-6a99-4459-955f-cfb941679dde
+2021-08-21 14:01:59,570 [117] WARN  sample01.Controllers.v1.TestApiController [(null)] - 文件不存在：F:\Git\.net-core-sample\sample01/wwwroot/imgs/meinv2.jpg
+```
+
+​			日志模块默认采用的是log4net，可以在log4net.config文件进行环境里日志需求配置，如：
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <!-- This section contains the log4net configuration settings -->
+  <log4net>
+    <appender name="ConsoleAppender" type="log4net.Appender.ConsoleAppender">
+      <layout type="log4net.Layout.PatternLayout" value="%date [%thread] %-5level %logger - %message%newline" />
+    </appender>
+
+    <appender name="FileAppender" type="log4net.Appender.FileAppender">
+      <file value="log-file.log" />
+      <appendToFile value="true" />
+      <layout type="log4net.Layout.PatternLayout">
+        <conversionPattern value="%date [%thread] %-5level %logger [%property{NDC}] - %message%newline" />
+      </layout>
+    </appender>
+
+    <appender name="RollingLogFileAppender" type="log4net.Appender.RollingFileAppender">
+      <file value="logs/" />
+      <appendToFile value="true" />
+      <rollingStyle value="Composite" />
+      <staticLogFileName value="false" />
+      <datePattern value="yyyyMMdd'.log'" />
+      <maxSizeRollBackups value="10" />
+      <maximumFileSize value="1MB" />
+      <layout type="log4net.Layout.PatternLayout">
+        <conversionPattern value="%date [%thread] %-5level %logger [%property{NDC}] - %message%newline" />
+      </layout>
+    </appender>
+
+    <appender name="AopRollingLogFileAppender" type="log4net.Appender.RollingFileAppender">
+      <file value="logs/" />
+      <appendToFile value="true" />
+      <rollingStyle value="Composite" />
+      <staticLogFileName value="false" />
+      <datePattern value="yyyyMMdd'_Aop.log'" />
+      <maxSizeRollBackups value="10" />
+      <maximumFileSize value="1MB" />
+      <layout type="log4net.Layout.PatternLayout">
+        <conversionPattern value="%date [%thread] %-5level %logger [%property{NDC}] - %message%newline" />
+      </layout>
+    </appender>
+
+    <root>
+      <level value="ALL" />
+      <appender-ref ref="ConsoleAppender" />
+      <!--<appender-ref ref="FileAppender" />-->
+      <appender-ref ref="RollingLogFileAppender" />
+    </root>
+    <logger name="Aop">
+      <level value="ALL"/>
+      <appender-ref ref="AopRollingLogFileAppender" />
+    </logger>
+
+  </log4net>
+</configuration>
+```
+
+
+
+###### 		5.发布接口程序到服务器（windows & linux【docker】）【待续】
 
 源码地址：[hanbing81868164/.net-core-sample: .net core sample (github.com)](https://github.com/hanbing81868164/.net-core-sample)
 

@@ -19,6 +19,26 @@ namespace sample01.Controllers.v1
     public class TestApiController : Controller
     {
 
+        #region 日志相关
+        public NCore.Logging.ILoggerFactory loggerFactory { get; set; }
+
+        private NCore.Logging.ILogger _logger;
+
+        /// <summary>
+        /// 日志对象
+        /// </summary>
+        public NCore.Logging.ILogger Logger
+        {
+            get
+            {
+                if (_logger == null)
+                    _logger = loggerFactory.GetCurrentClassLogger(typeof(TestApiController));
+                return _logger;
+            }
+        }
+        #endregion
+
+
         /// <summary>
         /// 返回用户信息接口
         /// </summary>
@@ -31,19 +51,26 @@ namespace sample01.Controllers.v1
             return Task.Run(() =>
             {
                 ViewModelBase<UserViewMmodel> res = new ViewModelBase<UserViewMmodel>();
-                //业务逻辑代码....
-                res = new ViewModelBase<UserViewMmodel>
+                try
                 {
-                    code = 0,
-                    msg = "成功返回用户信息",
-                    data = new UserViewMmodel
+                    //业务逻辑代码....
+                    res = new ViewModelBase<UserViewMmodel>
                     {
-                        address = "上海市浦东区世纪大道200号",
-                        age = 23,
-                        creation_time = DateTime.Now,
-                        version = "v1.0"
-                    }
-                };
+                        code = 0,
+                        msg = "成功返回用户信息",
+                        data = new UserViewMmodel
+                        {
+                            address = "上海市浦东区世纪大道200号",
+                            age = 23,
+                            creation_time = DateTime.Now,
+                            version = "v1.0"
+                        }
+                    };
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"唉，出错了：{ex.Message}\n{ex.StackTrace}");
+                }
 
                 return res;
             });
@@ -74,31 +101,38 @@ namespace sample01.Controllers.v1
         public IActionResult GetImage(int width, string name)
         {
             var imgPath = $@"{Directory.GetCurrentDirectory()}/wwwroot/imgs/{name}";
-
-            //缩小图片
-            using (var imgBmp = new Bitmap(imgPath))
+            if (imgPath.ExistsFile())
             {
-                //找到新尺寸
-                var oWidth = imgBmp.Width;
-                var oHeight = imgBmp.Height;
-                var height = oHeight;
-                if (width > oWidth)
+                //缩小图片
+                using (var imgBmp = new Bitmap(imgPath))
                 {
-                    width = oWidth;
+                    //找到新尺寸
+                    var oWidth = imgBmp.Width;
+                    var oHeight = imgBmp.Height;
+                    var height = oHeight;
+                    if (width > oWidth)
+                    {
+                        width = oWidth;
+                    }
+                    else
+                    {
+                        height = width * oHeight / oWidth;
+                    }
+                    var newImg = new Bitmap(imgBmp, width, height);
+                    newImg.SetResolution(72, 72);
+                    byte[] bytes;
+                    using (var ms = new MemoryStream())
+                    {
+                        newImg.Save(ms, ImageFormat.Bmp);
+                        bytes = ms.GetBuffer();
+                    }
+                    return new FileContentResult(bytes, "image/jpeg");
                 }
-                else
-                {
-                    height = width * oHeight / oWidth;
-                }
-                var newImg = new Bitmap(imgBmp, width, height);
-                newImg.SetResolution(72, 72);
-                byte[] bytes;
-                using (var ms = new MemoryStream())
-                {
-                    newImg.Save(ms, ImageFormat.Bmp);
-                    bytes = ms.GetBuffer();
-                }
-                return new FileContentResult(bytes, "image/jpeg");
+            }
+            else
+            {
+                Logger.Warn($"文件不存在：{imgPath}");
+                return Content("文件不存在");
             }
         }
 

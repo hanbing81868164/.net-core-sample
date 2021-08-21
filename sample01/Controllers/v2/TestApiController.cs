@@ -34,7 +34,7 @@ namespace sample01.Controllers.v2
                         address = "上海市浦东区世纪大道200号",
                         age = 23,
                         creation_time = DateTime.Now,
-                        version = "v1.0"
+                        version = "v2.0"
                     }
                 };
 
