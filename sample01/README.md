@@ -537,15 +537,15 @@
 
 
 
-###### 		5.发布接口程序到服务器（windows & linux【docker】）
+#### 		5.发布接口程序到服务器（ windows & centos & docker ）
 
-###### 			1.发布项目文件
+##### 			1.发布项目文件
 
-​						1）.在解决方案中项目上右键选择“发布”
+###### 						1）.在解决方案中项目上右键选择“发布”
 
 <img src="imgs/image-20210822165948547.png"/>
 
-​					2）.在windows（我使用的是win11;win10和win7安装方法一样）下IIS中安装.net core运行环境
+###### 					2）.在windows（我使用的是win11;win10和win7安装方法一样）下IIS中安装.net core运行环境
 
 ​							a）.下载 .net core hosting [Download .NET Core 3.1 (Linux, macOS, and Windows) (microsoft.com)](https://dotnet.microsoft.com/download/dotnet/3.1)
 
@@ -565,6 +565,158 @@
 
 ​					到这里IIS部署.net core项目已经完成了，是不是很简单，下面我们就要开始在CentOS里部署.net core
 
+###### 					3）.在CentOS（我使用的是centos7.5版本）上安装.net core运行环境
+
+​								a），安装packages-microsoft-prod.rpm
+
+```shell
+sudo rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+```
+
+需要先安装微软在Linux下的软件包，执行以上命令即可；
+
+​								b），更新yum
+
+```shell
+sudo yum update
+```
+
+更新软件包，执行以上命令即可；
+
+​								c），安装.Net Core （本文安装的是.Net Core 3.1）
+
+```shell
+sudo yum install dotnet-sdk-3.1
+```
+
+至此，.Net Core在Linux下安装成功，如下图所示：
+
+```shell
+dotnet --version
+```
+
+整个过程输出如下：
+
+```shell
+[root@VM-0-2-centos ~]# sudo rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+Retrieving https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
+Preparing...                          ################################# [100%]
+	package packages-microsoft-prod-1.0-1.el7.noarch is already installed
+[root@VM-0-2-centos ~]# sudo yum update
+Loaded plugins: fastestmirror, langpacks
+Loading mirror speeds from cached hostfile
+No packages marked for update
+[root@VM-0-2-centos ~]# sudo yum install dotnet-sdk-3.1
+Loaded plugins: fastestmirror, langpacks
+Loading mirror speeds from cached hostfile
+Resolving Dependencies
+--> Running transaction check
+---> Package dotnet-sdk-3.1.x86_64 0:3.1.412-1 will be installed
+--> Processing Dependency: dotnet-runtime-3.1 for package: dotnet-sdk-3.1-3.1.412-1.x86_64
+--> Processing Dependency: aspnetcore-runtime-3.1 for package: dotnet-sdk-3.1-3.1.412-1.x86_64
+--> Running transaction check
+---> Package aspnetcore-runtime-3.1.x86_64 0:3.1.18-1 will be installed
+---> Package dotnet-runtime-3.1.x86_64 0:3.1.18-1 will be installed
+--> Processing Dependency: dotnet-runtime-deps-3.1 >= 3.1.18 for package: dotnet-runtime-3.1-3.1.18-1.x86_64
+--> Running transaction check
+---> Package dotnet-runtime-deps-3.1.x86_64 0:3.1.18-1 will be installed
+--> Processing Dependency: libicu for package: dotnet-runtime-deps-3.1-3.1.18-1.x86_64
+--> Running transaction check
+---> Package libicu.x86_64 0:50.2-4.el7_7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+===========================================================================================================
+ Package                        Arch          Version             Repository                          Size
+===========================================================================================================
+Installing:
+ dotnet-sdk-3.1                 x86_64        3.1.412-1           packages-microsoft-com-prod         71 M
+Installing for dependencies:
+ aspnetcore-runtime-3.1         x86_64        3.1.18-1            packages-microsoft-com-prod        7.5 M
+ dotnet-runtime-3.1             x86_64        3.1.18-1            packages-microsoft-com-prod         29 M
+ dotnet-runtime-deps-3.1        x86_64        3.1.18-1            packages-microsoft-com-prod        2.8 k
+ libicu                         x86_64        50.2-4.el7_7        os                                 6.9 M
+
+Transaction Summary
+===========================================================================================================
+Install  1 Package (+4 Dependent packages)
+
+Total download size: 114 M
+Installed size: 298 M
+Is this ok [y/d/N]: y
+Downloading packages:
+(1/5): aspnetcore-runtime-3.1.18-x64.rpm                                            | 7.5 MB  00:00:00     
+(2/5): dotnet-runtime-deps-3.1.18-rhel.7-x64.rpm                                    | 2.8 kB  00:00:00     
+(3/5): libicu-50.2-4.el7_7.x86_64.rpm                                               | 6.9 MB  00:00:00     
+(4/5): dotnet-sdk-3.1.412-x64.rpm                                                   |  71 MB  00:00:08     
+(5/5): dotnet-runtime-3.1.18-x64.rpm                                                |  29 MB  00:00:39     
+-----------------------------------------------------------------------------------------------------------
+Total                                                                      2.9 MB/s | 114 MB  00:00:39     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : libicu-50.2-4.el7_7.x86_64                                                              1/5 
+  Installing : dotnet-runtime-deps-3.1-3.1.18-1.x86_64                                                 2/5 
+  Installing : dotnet-runtime-3.1-3.1.18-1.x86_64                                                      3/5 
+  Installing : aspnetcore-runtime-3.1-3.1.18-1.x86_64                                                  4/5 
+  Installing : dotnet-sdk-3.1-3.1.412-1.x86_64                                                         5/5 
+This software may collect information about you and your use of the software, and send that to Microsoft.
+Please visit http://aka.ms/dotnet-cli-eula for more information.
+Welcome to .NET Core!
+---------------------
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
+
+Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+
+Configuring...
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.
+  Verifying  : dotnet-sdk-3.1-3.1.412-1.x86_64                                                         1/5 
+  Verifying  : dotnet-runtime-3.1-3.1.18-1.x86_64                                                      2/5 
+  Verifying  : aspnetcore-runtime-3.1-3.1.18-1.x86_64                                                  3/5 
+  Verifying  : dotnet-runtime-deps-3.1-3.1.18-1.x86_64                                                 4/5 
+  Verifying  : libicu-50.2-4.el7_7.x86_64                                                              5/5 
+
+Installed:
+  dotnet-sdk-3.1.x86_64 0:3.1.412-1                                                                        
+
+Dependency Installed:
+  aspnetcore-runtime-3.1.x86_64 0:3.1.18-1               dotnet-runtime-3.1.x86_64 0:3.1.18-1             
+  dotnet-runtime-deps-3.1.x86_64 0:3.1.18-1              libicu.x86_64 0:50.2-4.el7_7                     
+
+Complete!
+[root@VM-0-2-centos ~]# dotnet --version
+3.1.412
+
+```
+
+<img src="imgs/image-20210822204446127.png"/>
+
+###### 4）.上传发布后的版本到服务器
+
+<img src="imgs/image-20210822205641881.png"/>
+
+4）.运行.net core程序，进入sample01目录后执行以下命令
+
+```shell
+[root@VM-0-2-centos sample01]# dotnet sample01.dll
+```
+<img src="imgs/image-20210822210007326.png"/>
+
+###### 5）.验证服务是否能够访问
+
+<img src="imgs/image-20210822210316180.png"/>
+
+说明我们发布的.net core web api服务已经在centos 7.5上运行起来了
+
+下一篇我们再把.net core web api服务部署到docker容器上
 
 
 源码地址：[hanbing81868164/.net-core-sample: .net core sample (github.com)](https://github.com/hanbing81868164/.net-core-sample)
