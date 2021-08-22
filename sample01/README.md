@@ -537,7 +537,35 @@
 
 
 
-###### 		5.发布接口程序到服务器（windows & linux【docker】）【待续】
+###### 		5.发布接口程序到服务器（windows & linux【docker】）
+
+###### 			1.发布项目文件
+
+​						1）.在解决方案中项目上右键选择“发布”
+
+<img src="imgs/image-20210822165948547.png"/>
+
+​					2）.在windows（我使用的是win11;win10和win7安装方法一样）下IIS中安装.net core运行环境
+
+​							a）.下载 .net core hosting [Download .NET Core 3.1 (Linux, macOS, and Windows) (microsoft.com)](https://dotnet.microsoft.com/download/dotnet/3.1)
+
+<img src="imgs/image-20210822170501909.png"/>
+
+​				b）.IIS创建应用程序池
+
+<img src="imgs/image-20210822170855151.png"/>
+
+​					c）.IIS创建站点（自定义网站名称，选择刚才创建的程序池，设置网站内容的物理路径【就是上面项目发布后的文件】，绑定网站是HTTP还是HTTPS类型，网站端口配置，如果是发布到服务器上通常是通过域名来访问，所以下面的主机名就是你解析到服务器的域名【访问前记得解析域名哟】）
+
+<img src="imgs/image-20210822171358219.png"/>
+
+​					d）.测试站点是否能正常运行（在浏览器里访问一个我们之前编写好的接口）
+
+<img src="imgs/image-20210822171955578.png"/>
+
+​					到这里IIS部署.net core项目已经完成了，是不是很简单，下面我们就要开始在CentOS里部署.net core
+
+
 
 源码地址：[hanbing81868164/.net-core-sample: .net core sample (github.com)](https://github.com/hanbing81868164/.net-core-sample)
 
